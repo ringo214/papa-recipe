@@ -118,7 +118,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 # 画像を保存するためのルール
-MEDIA_URL = 'media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'

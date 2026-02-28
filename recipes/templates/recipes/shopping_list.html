@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>買い物リスト - パパのレシピ帳</title>
+</head>
+<body style="font-family: sans-serif; background-color: #f7f9fc; color: #333; margin: 0; padding: 20px;">
+    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        
+        <a href="{% url 'recipe_list' %}" style="text-decoration: none; color: #6c5ce7; font-weight: bold;">← 一覧に戻る</a>
+        
+        <h1 style="color: #00b894; border-bottom: 2px solid #00b894; padding-bottom: 10px; text-align: center;">🛒 買い物リスト</h1>
+
+        {% if selected_recipes %}
+            {% for recipe in selected_recipes %}
+                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 10px; background-color: #fafafa;">
+                    <h2 style="margin-top: 0; color: #6c5ce7; font-size: 20px;">{{ recipe.title }}</h2>
+                    <p style="white-space: pre-wrap; font-size: 16px; margin-bottom: 0;">{{ recipe.ingredients }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center; color: #888; margin: 40px 0;">レシピが選ばれていません！</p>
+        {% endif %}
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="{% url 'recipe_list' %}" style="background-color: #ccc; color: white; text-decoration: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; display: inline-block;">買い出し完了！</a>
+        </div>
+    </div>
+</body>
+</html>
