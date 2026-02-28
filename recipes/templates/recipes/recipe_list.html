@@ -141,6 +141,26 @@
         
         <form method="GET" action="" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; width: 100%;">
             <input type="text" name="q" placeholder="料理名で検索..." value="{{ request.GET.q }}" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; width: 150px;">
+            
+            <select name="tool" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
+                <option value="">すべての器具</option>
+                {% for t in tools %}
+                <option value="{{ t }}" {% if request.GET.tool == t %}selected{% endif %}>{{ t }}</option>
+                {% endfor %}
+            </select>
+        
+            <select name="poster" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
+                <option value="">すべての投稿者</option>
+                {% for p in posters %}
+                <option value="{{ p }}" {% if request.GET.poster == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        
+            <button type="submit" class="header-btn" style="background-color: #6c5ce7; border: none; color: white; padding: 10px 20px; border-radius: 20px; cursor: pointer;">絞り込む</button>
+            
+            {% if request.GET.q or request.GET.tool or request.GET.poster %}
+            <a href="/" class="header-btn" style="background-color: #ccc; text-decoration: none; color: white; padding: 10px 20px; border-radius: 20px;">クリア</a>
+            {% endif %}
         </form>
 
     </header>
