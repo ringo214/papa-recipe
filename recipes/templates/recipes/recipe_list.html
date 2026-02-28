@@ -114,6 +114,23 @@
             color: #bbb;
             margin-top: 15px;
         }
+        @media (max-width: 600px) {
+        .header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+        }
+        .header form {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        }
+        .header > a.header-btn {
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+        }
+        }
     </style>
 </head>
 <body>
@@ -130,7 +147,7 @@
             {% endif %}
         </form>
 
-        <a href="/admin/" class="header-btn" target="_blank">＋ レシピ追加</a>
+        <a href="/admin/" class="header-btn" target="_blank" style="white-space: nowrap;">＋ レシピ追加</a>
     </header>
 
     <div class="recipe-grid">
