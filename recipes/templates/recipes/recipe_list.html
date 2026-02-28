@@ -139,16 +139,10 @@
     <header class="header">
         <div class="header-logo">🍳 PAPA'S RECIPE</div>
         
-        <form method="GET" action="" style="display: flex; gap: 10px; align-items: center;">
-            <input type="text" name="q" placeholder="料理名で検索..." value="{{ request.GET.q }}" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; width: 200px;">
-            <button type="submit" class="header-btn" style="background-color: #6c5ce7; border: none; cursor: pointer;">検索</button>
-            
-            {% if request.GET.q %}
-            <a href="/" class="header-btn" style="background-color: #ccc; text-decoration: none;">クリア</a>
-            {% endif %}
+        <form method="GET" action="" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; width: 100%;">
+            <input type="text" name="q" placeholder="料理名で検索..." value="{{ request.GET.q }}" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; width: 150px;">
         </form>
 
-        <a href="/admin/" class="header-btn" target="_blank" style="white-space: nowrap;">＋ レシピ追加</a>
     </header>
 
     <div class="recipe-grid">
