@@ -1,6 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Recipe, CookLog
 from .forms import CookLogForm
+from .models import Recipe, CookLog, Comment 
+# ↓ CommentForm を追加
+from .forms import CookLogForm, CommentForm
 
 def recipe_list(request):
     # ① 画面から送られてきた条件を受け取る
@@ -42,10 +45,7 @@ def recipe_list(request):
     }
     return render(request, 'recipes/recipe_list.html', context)
 
-# --- 一番上の import 部分をこのように書き換えます ---
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Recipe, CookLog
-from .forms import CookLogForm
+
 
 # --- (既存の recipe_list のコードはそのまま残しておいてください！) ---
 
@@ -71,10 +71,13 @@ def recipe_detail(request, pk):
     # ③ 過去にパパが作った記録一覧（新しい順に並べる）
     cook_logs = recipe.cook_logs.all().order_by('-created_at')
 
+    comment_form = CommentForm()
+
     context = {
         'recipe': recipe,
         'form': form,
         'cook_logs': cook_logs,
+        'comment_form': comment_form,
     }
     return render(request, 'recipes/recipe_detail.html', context)
 
@@ -90,3 +93,17 @@ def shopping_list(request):
         'selected_recipes': selected_recipes,
     }
     return render(request, 'recipes/shopping_list.html', context)
+
+def add_comment(request, pk):
+    # どのパパの料理記録（CookLog）に対するコメントかを探す！
+    cook_log = get_object_or_404(CookLog, pk=pk)
+    
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.cook_log = cook_log # 「この写真へのコメントだよ」と紐付け！
+            comment.save()              # データベースに保存！
+            
+    # 保存が終わったら、元のレシピ詳細画面に自動で戻る！
+    return redirect('recipe_detail', pk=cook_log.recipe.pk)

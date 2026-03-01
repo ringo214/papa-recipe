@@ -53,3 +53,21 @@ class CookLog(models.Model):
     def __str__(self):
         # 管理画面で「カレーの記録 (2026-03-01)」みたいに見やすくする設定
         return f"{self.recipe.title} の記録 ({self.created_at.strftime('%Y-%m-%d')})"
+
+# --- （既存のRecipeとCookLogクラスはそのまま残す） ---
+
+class Comment(models.Model):
+    # ① どの料理記録に対するコメントか？（CookLogとヒモ付ける魔法）
+    cook_log = models.ForeignKey(CookLog, on_delete=models.CASCADE, related_name='comments', verbose_name='対象の記録')
+    
+    # ② 誰が書いたか（ログイン不要にするためのシンプルな文字入力）
+    author = models.CharField('お名前', max_length=50, default='')
+    
+    # ③ コメントの内容
+    text = models.TextField('コメント')
+    
+    # ④ コメントした日時
+    created_at = models.DateTimeField('投稿日時', auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.author}さんからのコメント"

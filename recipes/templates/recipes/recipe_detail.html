@@ -44,7 +44,26 @@
                     <p style="font-weight: bold; margin-bottom: 0;">📝 レシピメモ：</p>
                     <p style="margin-top: 5px; white-space: pre-wrap;">{{ log.memo }}</p>
                 {% endif %}
-            </div>
+
+                <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                    <h4 style="margin: 0 0 10px 0; color: #6c5ce7;">💬 みんなのコメント</h4>
+                    
+                    {% for comment in log.comments.all %}
+                        <div style="background-color: #f1f2f6; padding: 8px; border-radius: 8px; margin-bottom: 5px; font-size: 14px;">
+                            <strong>{{ comment.author }}：</strong> {{ comment.text }}
+                        </div>
+                    {% empty %}
+                        <p style="font-size: 12px; color: #aaa;">まだコメントはありません。一番乗りでコメントしよう！</p>
+                    {% endfor %}
+
+                    <form action="{% url 'add_comment' log.pk %}" method="POST" style="margin-top: 10px;">
+                        {% csrf_token %}
+                        <div style="margin-bottom: 5px;">{{ comment_form.author }}</div>
+                        <div style="margin-bottom: 5px;">{{ comment_form.text }}</div>
+                        <button type="submit" style="background-color: #74b9ff; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%;">送信！</button>
+                    </form>
+                </div>
+                </div>
         {% empty %}
             <p>まだ記録はありません。最初のつくれぽをお待ちしています！</p>
         {% endfor %}
