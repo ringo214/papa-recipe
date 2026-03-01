@@ -45,7 +45,7 @@ class CookLog(models.Model):
     photo = models.ImageField('完成写真', upload_to='cook_logs/', null=True, blank=True)
     
     # ③ A案：パパの味付けメモ！
-    memo = models.TextField('パパの味付けメモ（次回への改善点など）', blank=True, null=True)
+    memo = models.TextField('味付けメモ（アレンジ内容など）', blank=True, null=True)
     
     # ④ 作った日付
     created_at = models.DateTimeField('作った日', auto_now_add=True)
