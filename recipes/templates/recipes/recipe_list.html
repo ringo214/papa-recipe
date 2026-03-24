@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>PAPA'S RECIPE</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍳</text></svg>">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="/static/apple-touch-icon.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&display=swap');
 
@@ -65,7 +68,7 @@
             display: flex;
             flex-direction: column;
             /* 🌟フワッと動かすためのアニメーション準備 */
-            transition: all 0.3s ease; 
+            transition: all 0.3s ease;
         }
         /* 🌟マウスが乗った時にカードが浮き上がる魔法！ */
         .recipe-card:hover {
@@ -135,44 +138,44 @@
     </style>
 </head>
 <body>
-    
+
     <header class="header">
         <div class="header-logo">🍳 PAPA'S RECIPE</div>
-        
+
         <form method="GET" action="" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; width: 100%;">
             <input type="text" name="q" placeholder="料理名で検索..." value="{{ request.GET.q }}" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; width: 150px;">
-            
+
             <select name="tool" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
                 <option value="">すべての器具</option>
                 {% for t in tools %}
                 <option value="{{ t }}" {% if request.GET.tool == t %}selected{% endif %}>{{ t }}</option>
                 {% endfor %}
             </select>
-        
-            <select name="poster" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
+
+            <select name="author" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
                 <option value="">すべての投稿者</option>
-                {% for p in posters %}
-                <option value="{{ p }}" {% if request.GET.poster == p %}selected{% endif %}>{{ p }}</option>
+                {% for p in authors %}
+                <option value="{{ p }}" {% if request.GET.author == p %}selected{% endif %}>{{ p }}</option>
                 {% endfor %}
             </select>
-        
+
             <select name="category" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
                 <option value="">すべてのカテゴリ</option>
                 {% for value, label in category_choices %}
                 <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
             </select>
-        
+
             <select name="difficulty" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
                 <option value="">すべての難易度</option>
                 {% for value, label in difficulty_choices %}
                 <option value="{{ value }}" {% if request.GET.difficulty == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
             </select>
-        
+
             <button type="submit" class="header-btn" style="background-color: #6c5ce7; border: none; color: white; padding: 10px 20px; border-radius: 20px; cursor: pointer;">絞り込む</button>
-            
-            {% if request.GET.q or request.GET.tool or request.GET.poster or request.GET.category or request.GET.difficulty %}
+
+            {% if request.GET.q or request.GET.tool or request.GET.author or request.GET.category or request.GET.difficulty %}
             <a href="/" class="header-btn" style="background-color: #ccc; text-decoration: none; color: white; padding: 10px 20px; border-radius: 20px;">クリア</a>
             {% endif %}
         </form>
@@ -180,58 +183,61 @@
     </header>
 
     <form action="{% url 'shopping_list' %}" method="GET">
-    
+
         <div style="text-align: center; margin-bottom: 20px;">
             <button type="submit" style="background-color: #00b894; color: white; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🛒 選んだレシピで買い物リストを作成！</button>
         </div>
-    
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="{% url 'recipe_new' %}" style="background-color: #ff7675; color: white; text-decoration: none; padding: 10px 20px; border-radius: 20px; font-weight: bold;">➕ 新しいレシピを追加</a>
+        </div>
+
         <div class="recipe-grid">
             {% for recipe in recipes %}
             <div class="recipe-card" style="position: relative;">
-                
+
                 <input type="checkbox" name="recipe_ids" value="{{ recipe.id }}" style="position: absolute; top: 15px; right: 15px; transform: scale(1.8); cursor: pointer; z-index: 10;">
-    
+
                 <a href="{% url 'recipe_detail' recipe.pk %}" style="text-decoration: none; color: inherit;">
                     <div class="recipe-title">{{ recipe.title }}</div>
                 </a>
                 <p>🍲 カテゴリ: {{ recipe.get_category_display }}</p>
                 <p>⭐️ 難易度: {{ recipe.get_difficulty_display }}</p>
-                
+
                 <span class="tag">{{ recipe.tool }}</span>
-                
+
                 {% if recipe.image %}
                 <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 20px;">
                 {% endif %}
-    
+
                 <div class="section-box">
                     <div class="section-title">材料</div>
                     <div class="section-text">{{ recipe.ingredients|linebreaksbr }}</div>
                 </div>
-    
+
                 <div class="section-box">
                     <div class="section-title">作り方</div>
                     <div class="section-text">{{ recipe.instructions|linebreaksbr }}</div>
                 </div>
-    
+
                 <div class="date-text">
                     追加日: {{ recipe.created_at|date:"Y.m.d" }}
                 </div>
             </div>
-    
+
             {% empty %}
             <div style="text-align: center; grid-column: 1 / -1; padding: 60px 20px; color: #999;">
                 <div style="font-size: 3.5em; margin-bottom: 20px;">😢</div>
                 <h2 style="font-weight: 400; color: #666;">「{{ request.GET.q }}」のレシピは見つかりませんでした...</h2>
                 <p>別のキーワードで検索するか、右上のボタンから新しく追加してみましょう！</p>
             </div>
-    
+
             {% endfor %}
         </div>
-    
+
         <div style="text-align: center; margin-top: 20px;">
             <button type="submit" style="background-color: #00b894; color: white; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🛒 選んだレシピで買い物リストを作成！</button>
         </div>
-    
+
     </form>
 
 </body>

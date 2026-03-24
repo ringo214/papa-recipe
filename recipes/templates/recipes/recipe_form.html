@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新しいレシピを追加 - PAPA'S RECIPE</title>
+</head>
+<body style="font-family: sans-serif; background-color: #f7f9fc; padding: 20px;">
+    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        
+        <h2 style="color: #00b894; text-align: center;">🍳 新しいレシピを追加</h2>
+        
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div style="line-height: 2;">
+                {{ form.as_p }}
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="submit" style="background-color: #6c5ce7; color: white; border: none; padding: 15px 40px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer;">レシピを保存！</button>
+            </div>
+        </form>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{% url 'recipe_list' %}" style="color: #888; text-decoration: none;">← キャンセルして戻る</a>
+        </div>
+    </div>
+</body>
+</html>

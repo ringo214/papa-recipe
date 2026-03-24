@@ -8,17 +8,24 @@
 <body style="font-family: sans-serif; background-color: #f7f9fc; color: #333; margin: 0; padding: 20px;">
 
     <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        
+
         <a href="{% url 'recipe_list' %}" style="text-decoration: none; color: #6c5ce7; font-weight: bold;">← 一覧に戻る</a>
 
         <h1 style="color: #6c5ce7; border-bottom: 2px solid #6c5ce7; padding-bottom: 10px;">{{ recipe.title }}</h1>
+        <p style="color: #666; font-size: 14px;">
+            🧑‍🍳 投稿者: {{ recipe.author }}
+        </p>
+
+        <div style="margin-bottom: 20px;">
+            <a href="{% url 'recipe_edit' recipe.pk %}" style="background-color: #f39c12; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 14px; font-weight: bold;">📝 このレシピを編集する</a>
+        </div>
         <p>🍲 カテゴリ: {{ recipe.get_category_display }}</p>
         <p>⭐️ 難易度: {{ recipe.get_difficulty_display }}</p>
         <p>🍳 器具: {{ recipe.tool }}</p>
-        
+
         <h3 style="background-color: #f0f0f0; padding: 10px; border-radius: 8px;">🛒 材料</h3>
         <p style="white-space: pre-wrap;">{{ recipe.ingredients }}</p>
-        
+
         <h3 style="background-color: #f0f0f0; padding: 10px; border-radius: 8px;">👨‍🍳 作り方</h3>
         <p style="white-space: pre-wrap;">{{ recipe.instructions }}</p>
 
@@ -47,7 +54,7 @@
 
                 <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc;">
                     <h4 style="margin: 0 0 10px 0; color: #6c5ce7;">💬 みんなのコメント</h4>
-                    
+
                     {% for comment in log.comments.all %}
                         <div style="background-color: #f1f2f6; padding: 8px; border-radius: 8px; margin-bottom: 5px; font-size: 14px;">
                             <strong>{{ comment.author }}：</strong> {{ comment.text }}
