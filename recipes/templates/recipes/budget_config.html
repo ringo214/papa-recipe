@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>予算設定 - PAPA'S RECIPE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&display=swap');
+        body { background-color: #FAFAFA; color: #444; font-family: 'Noto Sans JP', sans-serif; margin: 0; }
+        .container { max-width: 500px; margin: 40px auto; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        h2 { text-align: center; font-size: 1.2em; margin-bottom: 30px; }
+        .budget-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .category-name { font-size: 0.9em; font-weight: 500; }
+        .input-group { display: flex; align-items: center; gap: 5px; }
+        input { width: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 10px; text-align: right; outline: none; }
+        input:focus { border-color: #6c5ce7; }
+        .btn-save { display: block; width: 100%; background-color: #6c5ce7; color: white; border: none; padding: 15px; border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: 30px; }
+        .btn-back { display: block; text-align: center; margin-top: 20px; color: #999; text-decoration: none; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>⚙️ カテゴリ別予算設定</h2>
+            <form method="post">
+                {% csrf_token %}
+                {% for config in config_list %}
+                <div class="budget-row">
+                    <span class="category-name">{{ config.name }}</span>
+                    <div class="input-group">
+                        <input type="number" name="budget_{{ config.code }}" value="{{ config.amount }}" min="0">
+                        <span style="font-size: 0.8em; color: #999;">円</span>
+                    </div>
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn-save">この内容で保存する</button>
+            </form>
+            <a href="{% url 'budget_list' %}" class="btn-back">戻る</a>
+        </div>
+    </div>
+</body>
+</html>

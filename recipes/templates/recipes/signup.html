@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ログイン - PAPA'S RECIPE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&display=swap');
+        body { background-color: #FAFAFA; font-family: 'Noto Sans JP', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; max-width: 350px; text-align: center; }
+        .logo { font-size: 1.5em; letter-spacing: 2px; margin-bottom: 30px; display: block; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        .btn-login { background-color: #6c5ce7; color: white; border: none; width: 100%; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <span class="logo">🍳 PAPA'S RECIPE</span>
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="ユーザー名" required>
+            <input type="password" name="password" placeholder="パスワード" required>
+            <button type="submit" class="btn-login">新規登録</button>
+        </form>
+    </div>
+</body>
+</html>

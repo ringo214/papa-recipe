@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-kiw_xv#*k%o@2idw(x33qs$-o@@@_yyd7+^d(nug583_^fd#$p'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -103,9 +103,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'ja'       # 'en-us' から変更
+TIME_ZONE = 'Asia/Tokyo'   # 'UTC' から変更
 
 USE_I18N = True
 
@@ -122,3 +121,26 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# 未ログイン時に飛ばす先のURL
+LOGIN_URL = 'login' 
+
+# ログインした後に飛ばす先のURL（家計簿一覧など）
+LOGIN_REDIRECT_URL = 'budget_list'
+
+# ログアウトした後に飛ばす先のURL
+LOGOUT_REDIRECT_URL = 'login'
+
+# 開発中：送信されるメールの内容をターミナルに表示する魔法
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# config/settings.py の一番下とかに追記
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'debug',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning', # 🌟 これで msg-warning が確実に出るようになる
+    messages.ERROR: 'error',
+}

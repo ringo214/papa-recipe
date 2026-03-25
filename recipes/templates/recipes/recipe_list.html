@@ -139,48 +139,62 @@
 </head>
 <body>
 
-    <header class="header">
-        <div class="header-logo">🍳 PAPA'S RECIPE</div>
+<header class="header" style="flex-direction: column; gap: 20px; padding: 20px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <a href="{% url 'recipe_list' %}" style="text-decoration: none; color: inherit;">
+            <div class="header-logo">🍳 PAPA'S RECIPE</div>
+        </a>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="{% url 'inventory_list' %}" class="header-btn" style="background-color: #74b9ff; text-decoration: none;">🧊 冷蔵庫</a>
+            
+            <a href="{% url 'budget_list' %}" class="header-btn" style="background-color: #6c5ce7; text-decoration: none;">💰 家計簿</a>
+            
+            <form action="{% url 'logout' %}" method="post" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="header-btn" style="background-color: #eee; color: #666; border: none; cursor: pointer;">ログアウト</button>
+            </form>
+        </div>
+    </div>
 
-        <form method="GET" action="" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; width: 100%;">
-            <input type="text" name="q" placeholder="料理名で検索..." value="{{ request.GET.q }}" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; width: 150px;">
+    <form method="GET" action="" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; width: 100%; background: #fdfdfd; padding: 15px; border-radius: 15px;">
+        <input type="text" name="q" placeholder="料理名で検索..." value="{{ request.GET.q }}" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; width: 150px;">
 
-            <select name="tool" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
-                <option value="">すべての器具</option>
-                {% for t in tools %}
-                <option value="{{ t }}" {% if request.GET.tool == t %}selected{% endif %}>{{ t }}</option>
-                {% endfor %}
-            </select>
+        <select name="tool" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
+            <option value="">すべての器具</option>
+            {% for t in tools %}
+            <option value="{{ t }}" {% if request.GET.tool == t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+        </select>
 
-            <select name="author" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
-                <option value="">すべての投稿者</option>
-                {% for p in authors %}
-                <option value="{{ p }}" {% if request.GET.author == p %}selected{% endif %}>{{ p }}</option>
-                {% endfor %}
-            </select>
+        <select name="author" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
+            <option value="">すべての投稿者</option>
+            {% for p in authors %}
+            <option value="{{ p }}" {% if request.GET.author == p %}selected{% endif %}>{{ p }}</option>
+            {% endfor %}
+        </select>
 
-            <select name="category" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
-                <option value="">すべてのカテゴリ</option>
-                {% for value, label in category_choices %}
-                <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-            </select>
+        <select name="category" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
+            <option value="">すべてのカテゴリ</option>
+            {% for value, label in category_choices %}
+            <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
 
-            <select name="difficulty" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
-                <option value="">すべての難易度</option>
-                {% for value, label in difficulty_choices %}
-                <option value="{{ value }}" {% if request.GET.difficulty == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-            </select>
+        <select name="difficulty" style="padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; background-color: white;">
+            <option value="">すべての難易度</option>
+            {% for value, label in difficulty_choices %}
+            <option value="{{ value }}" {% if request.GET.difficulty == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
 
-            <button type="submit" class="header-btn" style="background-color: #6c5ce7; border: none; color: white; padding: 10px 20px; border-radius: 20px; cursor: pointer;">絞り込む</button>
+        <button type="submit" class="header-btn" style="background-color: #6c5ce7; border: none; color: white; padding: 10px 20px; border-radius: 20px; cursor: pointer;">絞り込む</button>
 
-            {% if request.GET.q or request.GET.tool or request.GET.author or request.GET.category or request.GET.difficulty %}
-            <a href="/" class="header-btn" style="background-color: #ccc; text-decoration: none; color: white; padding: 10px 20px; border-radius: 20px;">クリア</a>
-            {% endif %}
-        </form>
-
-    </header>
+        {% if request.GET.q or request.GET.tool or request.GET.author or request.GET.category or request.GET.difficulty %}
+        <a href="{% url 'recipe_list' %}" class="header-btn" style="background-color: #ccc; text-decoration: none; color: white; padding: 10px 20px; border-radius: 20px;">クリア</a>
+        {% endif %}
+    </form>
+</header>
 
     <form action="{% url 'shopping_list' %}" method="GET">
 
@@ -194,6 +208,11 @@
         <div class="recipe-grid">
             {% for recipe in recipes %}
             <div class="recipe-card" style="position: relative;">
+                {% if recipe.can_make %}
+            <span style="position: absolute; top: -10px; right: -10px; background: #ff7675; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                ✨ 冷蔵庫に材料あるで！
+            </span>
+            {% endif %}
 
                 <input type="checkbox" name="recipe_ids" value="{{ recipe.id }}" style="position: absolute; top: 15px; right: 15px; transform: scale(1.8); cursor: pointer; z-index: 10;">
 
