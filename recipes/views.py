@@ -24,6 +24,7 @@ client = genai.Client(api_key='AIzaSyArWFvoeDALopyvh4pmkSKCMPfZvC_vHYk')
 # 2. レシピ関連の機能
 # ==========================================
 
+@login_required
 def recipe_list(request):
     query = request.GET.get('q')
     tool_query = request.GET.get('tool')
