@@ -144,3 +144,6 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning', # 🌟 これで msg-warning が確実に出るようになる
     messages.ERROR: 'error',
 }
+
+# settings.py の一番下に追加
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
