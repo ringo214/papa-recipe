@@ -13,6 +13,7 @@ from django.views import generic
 from django.db.models import Sum # 👈 合計を出すための魔法
 from django.utils import timezone
 import datetime
+from django.shortcuts import redirect
 
 # ==========================================
 # 1. Gemini AI の設定 (2026年最新Client方式)
@@ -356,10 +357,11 @@ def receipt_scan(request):
 
 #     return redirect('budget_list')
 
-class SignUpView(generic.CreateView):
+class SignUpView(SuccessMessageMixin, generic.CreateView):
     form_class = UserCreationForm
-    success_url = reverse_lazy('login') # 登録できたらログイン画面へ飛ばす
+    success_url = reverse_lazy('login')  # 登録できたらログイン画面へ
     template_name = 'recipes/signup.html'
+    success_message = "ユーザー登録が完了したで！さっそくログインしてみてな。"
 
 # recipes/views.py
 @login_required
