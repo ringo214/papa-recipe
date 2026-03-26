@@ -14,6 +14,7 @@ from django.db.models import Sum # 👈 合計を出すための魔法
 from django.utils import timezone
 import datetime
 from django.shortcuts import redirect
+from django.contrib.messages.views import SuccessMessageMixin  # 👈 これが足りてへんかった！
 
 # ==========================================
 # 1. Gemini AI の設定 (2026年最新Client方式)
