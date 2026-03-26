@@ -31,12 +31,15 @@
                 ユーザー名かパスワードが違うみたいやで！
             </div>
         {% endif %}
+
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-success">{{ message }}</div>
+                <div style="color: green; font-weight: bold; margin-bottom: 15px;">
+                    {{ message }}
+                </div>
             {% endfor %}
         {% endif %}
-
+        
         <form method="post">
             {% csrf_token %}
             <input type="text" name="username" placeholder="ユーザー名" required>

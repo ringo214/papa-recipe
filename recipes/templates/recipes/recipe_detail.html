@@ -1,80 +1,113 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ recipe.title }} - PAPA'S RECIPE</title>
-</head>
-<body style="font-family: sans-serif; background-color: #f7f9fc; color: #333; margin: 0; padding: 20px;">
+{% extends 'recipes/base.html' %}
 
-    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+{% block content %}
+<style>
+    /* 🌟 レシピ詳細専用のスタイル */
+    .detail-card { background: white; padding: 25px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
+    .back-btn { text-decoration: none; color: #6c5ce7; font-weight: bold; font-size: 0.9em; display: inline-block; margin-bottom: 15px; }
+    
+    .recipe-title { color: #333; font-size: 1.4em; border-bottom: 2px solid #6c5ce7; padding-bottom: 10px; line-height: 1.4; margin-top: 0; }
+    .meta-text { color: #666; font-size: 0.85em; margin-bottom: 5px; }
+    
+    .btn-edit { background-color: #f39c12; color: white; text-decoration: none; padding: 10px 15px; border-radius: 10px; font-size: 0.9em; font-weight: bold; display: inline-block; margin: 15px 0; }
+    
+    .section-head { background-color: #f1f2f6; padding: 12px 15px; border-radius: 10px; font-size: 1em; color: #444; margin-top: 25px; margin-bottom: 15px; }
+    .section-content { white-space: pre-wrap; font-size: 0.95em; line-height: 1.7; color: #555; padding: 0 5px; }
+    
+    .divider { border: none; border-top: 2px dashed #eee; margin: 30px 0; }
 
-        <a href="{% url 'recipe_list' %}" style="text-decoration: none; color: #6c5ce7; font-weight: bold;">← 一覧に戻る</a>
+    /* 📸 つくれぽフォーム */
+    .report-box { background-color: #fff0f5; padding: 20px; border-radius: 15px; }
+    .report-box input, .report-box textarea { width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; outline: none; }
+    .btn-submit { background-color: #ff7675; color: white; border: none; padding: 15px; font-size: 1.1em; font-weight: bold; border-radius: 30px; width: 100%; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 10px rgba(255,118,117,0.2); }
 
-        <h1 style="color: #6c5ce7; border-bottom: 2px solid #6c5ce7; padding-bottom: 10px;">{{ recipe.title }}</h1>
-        <p style="color: #666; font-size: 14px;">
-            🧑‍🍳 投稿者: {{ recipe.author }}
-        </p>
+    /* 🍽️ 過去の記録（ログ） */
+    .log-card { border: 1px solid #f1f1f1; padding: 15px; border-radius: 15px; margin-bottom: 15px; background-color: #fafafa; }
+    .log-date { color: #888; font-size: 0.8em; margin: 0 0 10px 0; }
+    .log-img { width: 100%; height: auto; max-height: 300px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
+    .log-memo-title { font-weight: bold; font-size: 0.9em; margin-bottom: 5px; color: #555; }
+    
+    /* 💬 コメントエリア */
+    .comment-area { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd; }
+    .comment-bubble { background-color: #e0f7fa; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 0.85em; color: #444; }
+    .comment-form input, .comment-form textarea { width: 100%; box-sizing: border-box; padding: 8px; margin-bottom: 5px; border-radius: 6px; border: 1px solid #ccc; font-size: 0.9em; }
+    .btn-comment { background-color: #74b9ff; color: white; border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 0.9em; }
+</style>
 
-        <div style="margin-bottom: 20px;">
-            <a href="{% url 'recipe_edit' recipe.pk %}" style="background-color: #f39c12; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 14px; font-weight: bold;">📝 このレシピを編集する</a>
-        </div>
-        <p>🍲 カテゴリ: {{ recipe.get_category_display }}</p>
-        <p>⭐️ 難易度: {{ recipe.get_difficulty_display }}</p>
-        <p>🍳 器具: {{ recipe.tool }}</p>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1 style="margin: 0; font-size: 1.2em; color: #333; letter-spacing: 1px;">🍳 PAPA'S RECIPE</h1>
+</div>
 
-        <h3 style="background-color: #f0f0f0; padding: 10px; border-radius: 8px;">🛒 材料</h3>
-        <p style="white-space: pre-wrap;">{{ recipe.ingredients }}</p>
+<div class="detail-card">
+    <a href="{% url 'recipe_list' %}" class="back-btn">← 一覧に戻る</a>
 
-        <h3 style="background-color: #f0f0f0; padding: 10px; border-radius: 8px;">👨‍🍳 作り方</h3>
-        <p style="white-space: pre-wrap;">{{ recipe.instructions }}</p>
+    <h1 class="recipe-title">{{ recipe.title }}</h1>
+    
+    <div class="meta-text">🧑‍🍳 投稿者: {{ recipe.author }}</div>
+    <div class="meta-text">🍲 カテゴリ: {{ recipe.get_category_display }}</div>
+    <div class="meta-text">⭐️ 難易度: {{ recipe.get_difficulty_display }}</div>
+    <div class="meta-text">🍳 器具: {{ recipe.tool }}</div>
 
-        <hr style="border: none; border-top: 2px dashed #ccc; margin: 30px 0;">
+    <div>
+        <a href="{% url 'recipe_edit' recipe.pk %}" class="btn-edit">📝 このレシピを編集する</a>
+    </div>
 
-        <h2 style="color: #ff7675;">📸 つくれぽを記録！</h2>
-        <form method="POST" enctype="multipart/form-data" style="background-color: #fff0f5; padding: 20px; border-radius: 15px;">
+    <h3 class="section-head">🛒 材料</h3>
+    <div class="section-content">{{ recipe.ingredients }}</div>
+
+    <h3 class="section-head">👨‍🍳 作り方</h3>
+    <div class="section-content">{{ recipe.instructions }}</div>
+
+    <hr class="divider">
+
+    <h2 style="color: #ff7675; font-size: 1.2em; margin-bottom: 15px;">📸 つくれぽを記録！</h2>
+    <div class="report-box">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit" style="background-color: #ff7675; color: white; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 30px; width: 100%; cursor: pointer; margin-top: 10px;">🚀 記録する！</button>
+            <button type="submit" class="btn-submit">🚀 記録する！</button>
         </form>
-
-        <hr style="border: none; border-top: 2px dashed #ccc; margin: 30px 0;">
-
-        <h2>🍽️ 過去の記録（{{ cook_logs.count }}回）</h2>
-        {% for log in cook_logs %}
-            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 10px; margin-bottom: 15px; background-color: #fafafa;">
-                <p style="color: #888; font-size: 14px; margin-top: 0;">📅 {{ log.created_at|date:"Y年m月d日 H:i" }}</p>
-                {% if log.photo %}
-                    <img src="{{ log.photo.url }}" alt="作った写真" style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;">
-                {% endif %}
-                {% if log.memo %}
-                    <p style="font-weight: bold; margin-bottom: 0;">📝 レシピメモ：</p>
-                    <p style="margin-top: 5px; white-space: pre-wrap;">{{ log.memo }}</p>
-                {% endif %}
-
-                <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc;">
-                    <h4 style="margin: 0 0 10px 0; color: #6c5ce7;">💬 みんなのコメント</h4>
-
-                    {% for comment in log.comments.all %}
-                        <div style="background-color: #f1f2f6; padding: 8px; border-radius: 8px; margin-bottom: 5px; font-size: 14px;">
-                            <strong>{{ comment.author }}：</strong> {{ comment.text }}
-                        </div>
-                    {% empty %}
-                        <p style="font-size: 12px; color: #aaa;">まだコメントはありません。一番乗りでコメントしよう！</p>
-                    {% endfor %}
-
-                    <form action="{% url 'add_comment' log.pk %}" method="POST" style="margin-top: 10px;">
-                        {% csrf_token %}
-                        <div style="margin-bottom: 5px;">{{ comment_form.author }}</div>
-                        <div style="margin-bottom: 5px;">{{ comment_form.text }}</div>
-                        <button type="submit" style="background-color: #74b9ff; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%;">送信！</button>
-                    </form>
-                </div>
-                </div>
-        {% empty %}
-            <p>まだ記録はありません。最初のつくれぽをお待ちしています！</p>
-        {% endfor %}
-
     </div>
-</body>
-</html>
+
+    <hr class="divider">
+
+    <h2 style="font-size: 1.2em; color: #444; margin-bottom: 15px;">🍽️ 過去の記録（{{ cook_logs.count }}回）</h2>
+    
+    {% for log in cook_logs %}
+        <div class="log-card">
+            <p class="log-date">📅 {{ log.created_at|date:"Y年m月d日 H:i" }}</p>
+            
+            {% if log.photo %}
+                <img src="{{ log.photo.url }}" alt="作った写真" class="log-img">
+            {% endif %}
+            
+            {% if log.memo %}
+                <div class="log-memo-title">📝 レシピメモ：</div>
+                <div class="section-content" style="margin-bottom: 10px;">{{ log.memo }}</div>
+            {% endif %}
+
+            <div class="comment-area">
+                <h4 style="margin: 0 0 10px 0; color: #6c5ce7; font-size: 0.95em;">💬 みんなのコメント</h4>
+
+                {% for comment in log.comments.all %}
+                    <div class="comment-bubble">
+                        <strong>{{ comment.author }}：</strong> {{ comment.text }}
+                    </div>
+                {% empty %}
+                    <p style="font-size: 0.8em; color: #aaa; margin-bottom: 10px;">まだコメントはありません。一番乗りでコメントしよう！</p>
+                {% endfor %}
+
+                <form action="{% url 'add_comment' log.pk %}" method="POST" class="comment-form">
+                    {% csrf_token %}
+                    <div>{{ comment_form.author }}</div>
+                    <div>{{ comment_form.text }}</div>
+                    <button type="submit" class="btn-comment">送信！</button>
+                </form>
+            </div>
+        </div>
+    {% empty %}
+        <p style="color: #999; text-align: center; padding: 20px 0; font-size: 0.9em;">まだ記録はありません。<br>最初のつくれぽをお待ちしています！</p>
+    {% endfor %}
+
+</div>
+{% endblock %}

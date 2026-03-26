@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PAPA'S RECIPE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        
+        /* 🎨 全体のベースデザイン（淡いグレー背景でスッキリと） */
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #F8F9FA; /* 優しいオフホワイト */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 70px; /* 下のメニューに隠れないように余白を取る */
+        }
+
+        /* 📱 スマホ向けのメイン領域 */
+        .container {
+            max-width: 600px; /* PCで見ても広がりすぎないように制限 */
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 📱 スマホ用ボトムナビゲーション（アプリみたいになる！） */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #ffffff;
+            border-top: 1px solid #EBEBEB;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+            z-index: 1000;
+        }
+        .bottom-nav a {
+            text-decoration: none;
+            color: #A0A0A0;
+            font-size: 0.75em;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-weight: 500;
+        }
+        .bottom-nav a.active {
+            color: #00cec9; /* 選択中の色 */
+        }
+        .nav-icon {
+            font-size: 1.5em;
+            margin-bottom: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <div class="bottom-nav">
+        <a href="{% url 'recipe_list' %}">
+            <span class="nav-icon">🍳</span>
+            <span>レシピ</span>
+        </a>
+        <a href="{% url 'budget_list' %}">
+            <span class="nav-icon">💰</span>
+            <span>家計簿</span>
+        </a>
+        <a href="{% url 'inventory_list' %}">
+            <span class="nav-icon">❄️</span>
+            <span>冷蔵庫</span>
+        </a>
+    </div>
+
+</body>
+</html>

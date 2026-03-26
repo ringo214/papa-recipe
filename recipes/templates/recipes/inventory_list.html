@@ -1,119 +1,100 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>冷蔵庫管理 - PAPA'S RECIPE</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&display=swap');
+{% extends 'recipes/base.html' %}
 
-        /* 全体設定：ボックモデルを固定 */
-        * { box-sizing: border-box; }
-        body { background-color: #FAFAFA; color: #444; font-family: 'Noto Sans JP', sans-serif; margin: 0; }
+{% block content %}
+<style>
+    /* 🌟 冷蔵庫ページ専用のスタイル */
+    .card { background-color: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
+
+    /* 📱 スマホ対応の入力フォーム（縦並びベース） */
+    .inventory-form { display: grid; grid-template-columns: 1fr; gap: 15px; }
+    .inventory-form input { padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 1em; outline: none; width: 100%; box-sizing: border-box; }
+    
+    .btn-submit { background-color: #74b9ff; color: white; border: none; padding: 15px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 1em; margin-top: 10px; width: 100%; box-shadow: 0 4px 10px rgba(116, 185, 255, 0.2); }
+
+    /* 📋 在庫リストのスタイル */
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f1f1; flex-wrap: wrap; gap: 10px; }
+    .item-row:last-child { border-bottom: none; }
+    
+    .item-info { flex: 1 1 auto; min-width: 150px; }
+    .item-name { font-weight: bold; font-size: 1.1em; color: #333; margin-bottom: 5px; }
+    .item-date { font-size: 0.8em; color: #74b9ff; font-weight: bold; margin-bottom: 5px; }
+    
+    .expiry-alert { color: #d63031; font-weight: bold; font-size: 0.8em; background: #fff0f0; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #ffb8b8; }
+    .expiry-normal { color: #999; font-size: 0.8em; display: inline-block; padding: 4px 0; }
+    
+    .btn-use { background-color: #ffeaa7; color: #d35400; text-decoration: none; padding: 10px 20px; border-radius: 20px; font-size: 0.9em; font-weight: bold; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; }
+</style>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1 style="margin: 0; font-size: 1.2em; color: #333; letter-spacing: 1px;">🍳 PAPA'S RECIPE</h1>
+    <form action="{% url 'logout' %}" method="post" style="margin: 0;">
+        {% csrf_token %}
+        <button type="submit" style="background: none; border: none; color: #999; font-size: 0.85em; text-decoration: underline; cursor: pointer;">ログアウト</button>
+    </form>
+</div>
+
+<h2 style="text-align: center; margin-bottom: 25px; color: #444; font-size: 1.3em;">🧊 冷蔵庫の在庫</h2>
+
+<div class="card">
+    <h3 style="font-size: 1em; margin: 0 0 15px 0; color: #666; border-bottom: 2px solid #74b9ff; padding-bottom: 8px; display: inline-block;">➕ 新しい食材を登録</h3>
+    <form method="post" class="inventory-form">
+        {% csrf_token %}
         
-        /* 🌟 共通ヘッダー：1pxの狂いもなく同期 🌟 */
-        .header { 
-            padding: 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: white; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
-        }
-        .header-logo { font-size: 1.2em; font-weight: 500; letter-spacing: 2px; color: #333; text-decoration: none; }
-        
-        /* ボタンの共通クラス（サイズと形状を固定） */
-        .header-btn { 
-            padding: 10px 20px; 
-            border-radius: 20px; 
-            font-size: 0.9em; 
-            font-weight: 500; 
-            border: none; 
-            cursor: pointer; 
-            display: inline-block; 
-            line-height: 1.2; /* テキストの高さによるズレを防止 */
-        }
-
-        /* メインコンテンツ */
-        .main-container { max-width: 800px; margin: 0 auto; padding: 30px 20px 40px 20px; }
-        .card { background-color: white; border-radius: 20px; padding: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.04); margin-bottom: 25px; }
-
-        /* フォーム系（他画面と共通の質感を維持） */
-        .inventory-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .inventory-form input { padding: 12px; border: 1px solid #ddd; border-radius: 12px; font-size: 1em; outline: none; width: 100%; }
-        .inventory-form input[name="name"] { grid-column: span 2; }
-        .btn-submit { grid-column: span 2; background-color: #00cec9; color: white; border: none; padding: 15px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 1em; margin-top: 10px; }
-
-        /* リスト系 */
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #f1f1f1; }
-        .item-row:last-child { border-bottom: none; }
-        .expiry-alert { color: #ff7675; font-weight: bold; font-size: 0.85em; background: #fff5f5; padding: 2px 8px; border-radius: 8px; margin-top: 4px; display: inline-block; }
-        .btn-use { background-color: #ffeaa7; color: #d63031; text-decoration: none; padding: 8px 15px; border-radius: 15px; font-size: 0.8em; font-weight: bold; }
-    </style>
-</head>
-<body>
-
-    <header class="header">
-        <a href="{% url 'recipe_list' %}" style="text-decoration: none; color: inherit;">
-            <div class="header-logo">🍳 PAPA'S RECIPE</div>
-        </a>
-        
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <a href="{% url 'budget_list' %}" class="header-btn" style="background-color: #6c5ce7; text-decoration: none; color: white;">💰 家計簿</a>
-
-            <a href="{% url 'recipe_list' %}" class="header-btn" style="background-color: #00cec9; text-decoration: none; color: white;">🍳 レシピ一覧</a>
-            
-            <form action="{% url 'logout' %}" method="post" style="margin: 0;">
-                {% csrf_token %}
-                <button type="submit" class="header-btn" style="background-color: #eee; color: #666; border: none; cursor: pointer;">ログアウト</button>
-            </form>
+        <div>
+            <label style="font-size: 0.8em; color: #999; margin-left: 5px; display: block; margin-bottom: 5px;">食材の名前</label>
+            {{ form.name }}
         </div>
-    </header>
-
-    <div class="main-container">
-        <h2 style="text-align: center; margin-bottom: 30px; color: #333;">🧊 冷蔵庫の在庫管理</h2>
-
-        <div class="card">
-            <h3 style="font-size: 1em; margin: 0 0 15px 0; color: #666;">➕ 新しい食材を登録</h3>
-            <form method="post" class="inventory-form">
-                {% csrf_token %}
-                {{ form.name }}
+        
+        <div style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+                <label style="font-size: 0.8em; color: #999; margin-left: 5px; display: block; margin-bottom: 5px;">量</label>
                 {{ form.quantity }}
-                {{ form.unit }}
-                <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 5px;">
-                    <label style="font-size: 0.8em; color: #999; margin-left: 5px;">賞味期限（任意）</label>
-                    {{ form.expiration_date }}
-                </div>
-                <button type="submit" class="btn-submit">冷蔵庫に保存する</button>
-            </form>
-        </div>
-
-        <div class="card">
-            <h3 style="font-size: 1em; margin: 0 0 15px 0; color: #666;">📋 現在の在庫</h3>
-            {% for item in items %}
-            <div class="item-row">
-                <div>
-                    <div style="font-weight: 500; font-size: 1.1em;">{{ item.name }}</div>
-                    
-                    <div style="font-size: 0.85em; color: #99b8ff; font-weight: 500; margin-top: 2px;">
-                        🛒 {{ item.purchase_date|date:"m/d" }} 購入
-                    </div>
-
-                    {% if item.expiration_date %}
-                    <div class="{% if item.is_near_expiry %}expiry-alert{% endif %}">
-                        📅 期限: {{ item.expiration_date|date:"Y/m/d" }}
-                        {% if item.is_near_expiry %} (🚨はよ食べて！){% endif %}
-                    </div>
-                    {% endif %}
-                </div>
-                
-                <a href="{% url 'inventory_delete' item.pk %}" class="btn-use">使い切った！</a>
             </div>
-            {% empty %}
-            <p style="text-align: center; color: #999; padding: 20px;">冷蔵庫は空っぽやで。</p>
-            {% endfor %}
+            <div style="flex: 1;">
+                <label style="font-size: 0.8em; color: #999; margin-left: 5px; display: block; margin-bottom: 5px;">単位 (個, gなど)</label>
+                {{ form.unit }}
+            </div>
         </div>
-    </div>
+        
+        <div>
+            <label style="font-size: 0.8em; color: #999; margin-left: 5px; display: block; margin-bottom: 5px;">賞味期限（任意）</label>
+            {{ form.expiration_date }}
+        </div>
+        
+        <button type="submit" class="btn-submit">冷蔵庫に保存する</button>
+    </form>
+</div>
 
-</body>
-</html>
+<div class="card">
+    <h3 style="font-size: 1em; margin: 0 0 15px 0; color: #666; border-bottom: 2px solid #00b894; padding-bottom: 8px; display: inline-block;">📋 現在の在庫</h3>
+    
+    {% for item in items %}
+    <div class="item-row">
+        <div class="item-info">
+            <div class="item-name">{{ item.name }} <span style="font-size: 0.8em; color: #666; font-weight: normal;">({{ item.quantity }}{{ item.unit }})</span></div>
+            
+            <div class="item-date">
+                🛒 {{ item.purchase_date|date:"m/d" }} 購入
+            </div>
+
+            {% if item.expiration_date %}
+                {% if item.is_near_expiry %}
+                    <div class="expiry-alert">🚨 期限: {{ item.expiration_date|date:"m/d" }} (はよ食べて！)</div>
+                {% else %}
+                    <div class="expiry-normal">📅 期限: {{ item.expiration_date|date:"m/d" }}</div>
+                {% endif %}
+            {% endif %}
+        </div>
+        
+        <a href="{% url 'inventory_delete' item.pk %}" class="btn-use">使い切った！</a>
+    </div>
+    {% empty %}
+    <div style="text-align: center; padding: 40px 20px;">
+        <div style="font-size: 3em; margin-bottom: 10px;">🍃</div>
+        <p style="color: #999; font-weight: bold;">冷蔵庫は空っぽやで。</p>
+        <p style="color: #bbb; font-size: 0.85em;">上のフォームから追加してな！</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

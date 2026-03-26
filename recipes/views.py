@@ -15,12 +15,19 @@ from django.utils import timezone
 import datetime
 from django.shortcuts import redirect
 from django.contrib.messages.views import SuccessMessageMixin  # 👈 これが足りてへんかった！
+import os
+from dotenv import load_dotenv
 
 # ==========================================
 # 1. Gemini AI の設定 (2026年最新Client方式)
 # ==========================================
-# ※APIキーはりえさんの最新のものに差し替えています
-client = genai.Client(api_key='AIzaSyArWFvoeDALopyvh4pmkSKCMPfZvC_vHYk')
+
+# .envファイルを読み込む
+load_dotenv()
+# APIキーを環境変数から取得
+client = genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
+
+
 
 # ==========================================
 # 2. レシピ関連の機能
@@ -50,24 +57,61 @@ def recipe_list(request):
     category_choices = Recipe.CATEGORY_CHOICES
     difficulty_choices = Recipe.DIFFICULTY_CHOICES
 
+    # 🌟 === ここから下の部分を書き換える === 🌟
+
     context = {
         'recipes': recipes,
         'tools': tools,
         'authors': authors,
         'category_choices': category_choices,
         'difficulty_choices': difficulty_choices,
-        'fridge_items': fridge_items, # 🌟 これも入れておくとデバッグしやすい
+        'fridge_items': fridge_items,
+    }
+
+    # 📚 AI謹製・めんどくさがり用「最強の表記ゆれ辞書」
+    SYNONYMS = {
+        # --- お肉系 ---
+        '豚肉': ['豚肉', '豚バラ', '豚こま', '豚ロース', '豚', 'ぶた'],
+        '牛肉': ['牛肉', '牛バラ', '牛こま', '牛', 'ぎゅう'],
+        '鶏肉': ['鶏肉', '鳥肉', '鶏もも', '鶏むね', 'チキン', 'とり'],
+        'ひき肉': ['ひき肉', '挽き肉', 'ミンチ', '合挽き'],
+        # --- 卵・乳製品・大豆 ---
+        'たまご': ['卵', 'たまご', '玉子', 'タマゴ'],
+        '卵': ['卵', 'たまご', '玉子', 'タマゴ'], # どっちで登録されてもいいように！
+        '牛乳': ['牛乳', 'ミルク'],
+        '豆腐': ['豆腐', 'とうふ', 'トウフ', '木綿豆腐', '絹ごし豆腐'],
+        '納豆': ['納豆', 'なっとう', 'ナットウ'],
+        # --- 野菜系 ---
+        '玉ねぎ': ['玉ねぎ', 'タマネギ', 'たまねぎ', '玉葱'],
+        'ネギ': ['ネギ', 'ねぎ', '長ネギ', '白ネギ', '青ネギ', '万能ねぎ'],
+        'キャベツ': ['キャベツ', 'きゃべつ'],
+        'じゃがいも': ['じゃがいも', 'ジャガイモ', 'ポテト', '馬鈴薯'],
+        'にんじん': ['にんじん', 'ニンジン', '人参'],
+        'にんにく': ['にんにく', 'ニンニク', '大蒜', 'ガーリック'],
+        'しょうが': ['しょうが', 'ショウガ', '生姜'],
+        '大根': ['大根', 'だいこん', 'ダイコン'],
+        'トマト': ['トマト', 'とまと', 'ミニトマト'],
+        'きのこ': ['きのこ', 'キノコ', 'しめじ', 'えのき', 'エリンギ', 'しいたけ'],
+        # --- 調味料 ---
+        '醤油': ['醤油', 'しょうゆ', 'ショウユ'],
+        '塩': ['塩', 'しお', 'ソルト'],
+        '砂糖': ['砂糖', 'さとう', 'シュガー'],
     }
 
     # 🌟 各レシピに「作れるかどうか」のフラグを立てる
     for recipe in recipes:
-        # 材料欄（ingredients）の中に、冷蔵庫の食材がいくつ入っているかカウント
         match_count = 0
         for item in fridge_items:
-            if item in recipe.ingredients: # 簡易的な文字列マッチング
-                match_count += 1
+            # 冷蔵庫の食材名が辞書にあればそのリストを、なければ元の名前だけを使う
+            search_terms = SYNONYMS.get(item, [item])
+            
+            # 辞書の中身を1つずつ、レシピの材料（ingredients）に含まれているかチェック！
+            for term in search_terms:
+                if recipe.ingredients and term in recipe.ingredients:
+                    match_count += 1
+                    break  # 1つでもヒットしたら、重複カウントを防ぐために次の食材へ
         
-        # 2つ以上一致したら「今すぐ作れる！」バッジを出すフラグ
+        # 🌟 「2つ以上」一致したらバッジを出すようにしておく！
         recipe.can_make = match_count >= 2
 
     return render(request, 'recipes/recipe_list.html', context)
@@ -280,87 +324,59 @@ def budget_edit(request, pk):
         'is_edit': True # 編集モード判定用
     })
 
-# 🌟 【重要】明日APIが復活したら、ここを False に戻すだけ！
-USE_MOCK = True
-
-# recipes/views.py
-
 @login_required
 def receipt_scan(request):
     if request.method == 'POST' and request.FILES.get('receipt_image'):
-        
-        # 🌟 ここでモック用のデータを「リスト形式」で作る
-        if USE_MOCK:
-            # 1. カンマ区切りの文字列を用意
-            raw_string = 'たまご,牛乳,豚バラ肉,小松菜,豆腐,納豆'
-            
-            # 2. 文字列を [リスト] に変換する
-            # split(',') でバラバラにして、strip() で余計な空白を取る
-            item_list = [i.strip() for i in raw_string.split(',') if i.strip()]
-            
-            scan_data = {
-                'date': timezone.now().strftime('%Y-%m-%d'),
-                'item_name': 'イオンフードスタイル守口店',
-                'amount': 2450,
-                'category': 'food',
-                # 🌟 【最重要】ここ！HTMLの {% for item in scan_data.item_list_raw %} と名前を合わせる
-                'item_list_raw': item_list 
-            }
-            messages.info(request, "⚠️ モックモード：たまごリスト出現準備完了！")
-        else:
-            # (APIが復活した時の処理：今はコメントアウト中のはず)
-            scan_data = {} 
+        try:
+            img_file = request.FILES['receipt_image']
+            img_data = img_file.read()
 
-        # 🌟 第二引数として scan_data を渡す
-        return render(request, 'recipes/receipt_confirm.html', {
-            'scan_data': scan_data,
-        })
+            # 🌟 指示（プロンプト）：JSONで返せ！と強く念押し
+            prompt = """
+            レシート画像を解析し、以下のJSON形式で1つだけ返してください。
+            Markdownの枠（```json）などは含めず、純粋なJSONテキストのみ出力してください。
+
+            {
+                "date": "YYYY-MM-DD",
+                "item_name": "店舗名",
+                "amount": 0,
+                "category": "food",
+                "item_list_raw": ["たまご", "牛乳", "豚肉"]
+            }
+            """
+
+            # 🌟 修正：リストで確認できた「models/gemini-2.5-flash」をフルネームで指定！
+            response = client.models.generate_content(
+                model='models/gemini-2.5-flash', 
+                contents=[
+                    prompt,
+                    types.Part.from_bytes(data=img_data, mime_type=img_file.content_type)
+                ]
+            )
+
+            # 🌟 AIの回答テキストをJSONデータに変換
+            res_text = response.text.replace('```json', '').replace('```', '').strip()
+            scan_data = json.loads(res_text)
+
+            # カテゴリの選択肢（food, daily...）を準備
+            category_choices = Budget.CATEGORY_CHOICES
+
+            # 🌟 HTML（receipt_confirm.html）にデータを送る！
+            return render(request, 'recipes/receipt_confirm.html', {
+                'scan_data': scan_data, # 👈 変数名を scan_data にしてHTMLと合わせる
+                'category_choices': category_choices,
+            })
+
+        except Exception as e:
+            # 何かあったらエラーメッセージを表示（QA的デバッグ）
+            messages.error(request, f"AIスキャン失敗：{e}")
+            return redirect('budget_list')
 
     return redirect('budget_list')
 
-# @login_required
-# def receipt_scan(request):
-#     if request.method == 'POST' and request.FILES.get('receipt_image'):
-#         try:
-#             img_file = request.FILES['receipt_image']
-#             img_data = img_file.read()
-
-#             # 🌟 修正：プロンプトのカテゴリーをりえさんのモデル(Budget.CATEGORY_CHOICES)のキーに合わせる
-#             prompt = """
-#             レシート画像を解析し、以下のJSON形式で返してください。
-#             categoryは (food, dining, daily, beauty, transport, education, utilities, other) から選んでください。
-            
-#             {"date": "YYYY-MM-DD", "item_name": "店舗名", "amount": 0, "category": "category_key"}
-#             """
-
-#             response = client.models.generate_content(
-#                 model='gemini-2.5-flash',
-#                 contents=[
-#                     prompt,
-#                     types.Part.from_bytes(data=img_data, mime_type=img_file.content_type)
-#                 ]
-#             )
-
-#             res_text = response.text.replace('```json', '').replace('```', '').strip()
-#             data = json.loads(res_text)
-#             if isinstance(data, list): data = data[0]
-
-#             # 🌟 ここが重要！モデルの選択肢をまるごと画面に送る
-#             category_choices = Budget.CATEGORY_CHOICES
-
-#             return render(request, 'recipes/receipt_confirm.html', {
-#                 'data': data,
-#                 'category_choices': category_choices, # 👈 これで8種類全部届く！
-#             })
-
-#         except Exception as e:
-#             return HttpResponse(f"エラー発生：{e}")
-
-#     return redirect('budget_list')
-
 class SignUpView(SuccessMessageMixin, generic.CreateView):
     form_class = UserCreationForm
-    success_url = reverse_lazy('login')  # 登録できたらログイン画面へ
+    success_url = reverse_lazy('login') # 登録成功したらログイン画面へ
     template_name = 'recipes/signup.html'
     success_message = "ユーザー登録が完了したで！さっそくログインしてみてな。"
 
