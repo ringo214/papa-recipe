@@ -2,11 +2,49 @@
 
 {% block content %}
 <style>
+    /* 🌟 Rieさんのクラス名に合わせた修正 */
+    .inventory-form input[type="text"],
+    .inventory-form input[type="number"],
+    .inventory-form select {
+        width: 100%;
+        max-width: 100%; /* これで絶対にはみ出させない */
+        box-sizing: border-box; /* パディングを内側に */
+        -webkit-appearance: none; /* iOS特有の影とかを消す */
+        border: 1px solid #ddd;
+        padding: 12px;
+        border-radius: 12px;
+        font-size: 16px !important; /* タップ時のズーム防止 */
+        margin-bottom: 12px;
+        display: block; /* 余計な隙間を消す */
+    }
+
+    /* 🌟 冷蔵庫の入力フォームをiPhoneに最適化 */
+    .inventory-form input[type="date"] {
+        display: block;
+        width: 100% !important; /* 🌟 親要素の幅を絶対超えない */
+        max-width: 100%;
+        box-sizing: border-box; /* 🌟 枠線とパディングを内側に含める（超重要） */
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        font-size: 16px !important; /* iOSの勝手なズームを防止 */
+        -webkit-appearance: none; /* iOSのデフォルトスタイルをリセット */
+        margin: 5px 0 15px 0;
+    }
+
+    /* 🌟 賞味期限のラベルと入力が横に並んでるなら、縦に並べるのがiPhoneでは安全 */
+    .inventory-form label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 0.9em;
+        color: #666;
+    }
+
     /* 🌟 冷蔵庫専用の追加スタイル */
     .inventory-add-section {
         margin-bottom: 30px;
     }
-    
+
     /* 入力フォームの微調整 */
     .inventory-form input {
         width: 100%;
@@ -16,7 +54,7 @@
         border-radius: 12px;
         box-sizing: border-box;
     }
-    
+
     .btn-submit {
         background-color: #74b9ff;
         color: white;
@@ -38,11 +76,11 @@
         border-bottom: 1px solid #f8f8f8;
     }
     .item-card:last-child { border-bottom: none; }
-    
+
     .item-main { flex-grow: 1; }
     .item-name { font-weight: bold; font-size: 1.05em; color: #333; }
     .item-meta { font-size: 0.75em; color: #999; margin-top: 4px; display: flex; gap: 10px; }
-    
+
     .expiry-badge {
         font-size: 0.7em;
         padding: 2px 8px;
@@ -73,10 +111,10 @@
     <h3 style="font-size: 0.9em; margin: 0 0 15px 0; color: #666; border-left: 4px solid #74b9ff; padding-left: 10px;">食材を新しく入れる</h3>
     <form method="post" class="inventory-form">
         {% csrf_token %}
-        
+
         <label style="font-size: 0.75em; color: #aaa; margin-left: 5px;">食材の名前</label>
         {{ form.name }}
-        
+
         <div style="display: flex; gap: 10px;">
             <div style="flex: 1;">
                 <label style="font-size: 0.75em; color: #aaa; margin-left: 5px;">量</label>
@@ -87,25 +125,25 @@
                 {{ form.unit }}
             </div>
         </div>
-        
+
         <label style="font-size: 0.75em; color: #aaa; margin-left: 5px;">賞味期限（任意）</label>
         {{ form.expiration_date }}
-        
+
         <button type="submit" class="btn-submit">冷蔵庫に保存！</button>
     </form>
 </div>
 
 <div class="ui-card">
     <h3 style="font-size: 0.9em; margin: 0 0 15px 0; color: #666; border-left: 4px solid #00b894; padding-left: 10px;">いま入っているもの</h3>
-    
+
     {% for item in items %}
     <div class="item-card">
         <div class="item-main">
             <div class="item-name">
-                {{ item.name }} 
+                {{ item.name }}
                 <span style="font-weight: normal; color: #888;">({{ item.quantity }}{{ item.unit }})</span>
             </div>
-            
+
             <div class="item-meta">
                 <span>🛒 {{ item.purchase_date|date:"m/d" }} 購入</span>
                 {% if item.expiration_date %}
@@ -119,9 +157,9 @@
                 {% endif %}
             {% endif %}
         </div>
-        
-        <a href="{% url 'inventory_delete' item.pk %}" 
-           class="btn-delete" 
+
+        <a href="{% url 'inventory_delete' item.pk %}"
+           class="btn-delete"
            onclick="return confirm('「{{ item.name }}」使い切った？')">
            使い切った！
         </a>
