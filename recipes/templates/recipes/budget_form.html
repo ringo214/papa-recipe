@@ -1,0 +1,26 @@
+{% extends 'recipes/base.html' %}
+
+{% block content %}
+<div class="ui-card" style="background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+    <h2 style="text-align: center; color: #00b894; margin-bottom: 25px;">💰 家計簿の入力</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <style>
+            /* フォームをモダンにするスタイル */
+            p { margin-bottom: 20px; }
+            label { display: block; font-size: 0.85em; color: #666; margin-bottom: 8px; font-weight: bold; }
+            input, select { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 16px !important; }
+            input:focus { border-color: #00b894; }
+        </style>
+        
+        {{ form.as_p }}
+
+        <button type="submit" class="btn-scan" style="background-color: #00b894; color: white; width: 100%; padding: 16px; border-radius: 30px; border: none; font-weight: bold; font-size: 1.1em; margin-top: 10px; cursor: pointer;">
+            保存する
+        </button>
+        
+        <a href="{% url 'budget_list' %}" style="display: block; text-align: center; margin-top: 20px; color: #999; text-decoration: none; font-size: 0.9em;">キャンセルして戻る</a>
+    </form>
+</div>
+{% endblock %}

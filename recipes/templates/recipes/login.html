@@ -2,24 +2,118 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ログイン - PAPA'S RECIPE</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&display=swap');
-        body { background-color: #FAFAFA; font-family: 'Noto Sans JP', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; max-width: 350px; text-align: center; }
-        .logo { font-size: 1.5em; letter-spacing: 2px; margin-bottom: 30px; display: block; color: #333; text-decoration: none; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; transition: border-color 0.3s; }
-        input:focus { border-color: #6c5ce7; }
-        .btn-login { background-color: #6c5ce7; color: white; border: none; width: 100%; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: opacity 0.3s; }
-        .btn-login:hover { opacity: 0.9; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
         
-        /* 🌟 新しく追加するスタイル */
-        .error-msg { color: #ff7675; font-size: 0.85em; margin-bottom: 15px; text-align: left; }
-        .divider { margin: 25px 0; border: 0; border-top: 1px solid #eee; position: relative; }
-        .divider::after { content: "または"; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: white; padding: 0 10px; font-size: 0.8em; color: #999; }
-        .btn-signup { display: block; background-color: #00cec9; color: white; text-decoration: none; padding: 10px; border-radius: 25px; font-weight: bold; font-size: 0.9em; margin-bottom: 15px; }
-        .forgot-link { font-size: 0.8em; color: #999; text-decoration: none; }
-        .forgot-link:hover { text-decoration: underline; }
+        body { 
+            background-color: #F8F9FA; 
+            font-family: 'Noto Sans JP', sans-serif; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .login-card { 
+            background: white; 
+            padding: 40px 25px; 
+            border-radius: 30px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05); 
+            width: 100%; 
+            max-width: 380px; 
+            text-align: center; 
+        }
+
+        .logo { 
+            font-size: 1.6em; 
+            font-weight: 700;
+            letter-spacing: 2px; 
+            margin-bottom: 30px; 
+            display: block; 
+            color: #333; 
+            text-decoration: none; 
+        }
+
+        input { 
+            width: 100%; 
+            padding: 16px; 
+            margin-bottom: 15px; 
+            border: 1px solid #eee; 
+            border-radius: 15px; 
+            box-sizing: border-box; 
+            outline: none; 
+            font-size: 16px !important;
+            background-color: #FDFDFD;
+            transition: all 0.3s;
+        }
+        input:focus { border-color: #6c5ce7; background-color: #fff; box-shadow: 0 0 10px rgba(108, 92, 231, 0.1); }
+
+        .btn-login { 
+            background-color: #6c5ce7; 
+            color: white; 
+            border: none; 
+            width: 100%; 
+            padding: 16px; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            font-size: 1.1em;
+            cursor: pointer; 
+            margin-top: 10px;
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.2);
+        }
+
+        .error-msg { 
+            background-color: #fff5f5;
+            color: #ff7675; 
+            font-size: 0.85em; 
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px; 
+            border: 1px solid #ffebeb;
+        }
+
+        .divider { 
+            margin: 35px 0 25px; 
+            border: 0; 
+            border-top: 1px solid #eee; 
+            position: relative; 
+        }
+        .divider::after { 
+            content: "または"; 
+            position: absolute; 
+            top: -11px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: white; 
+            padding: 0 15px; 
+            font-size: 0.8em; 
+            color: #bbb; 
+        }
+
+        .btn-signup { 
+            display: block; 
+            background-color: #00cec9; 
+            color: white; 
+            text-decoration: none; 
+            padding: 14px; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            font-size: 0.95em; 
+            box-shadow: 0 6px 15px rgba(0, 206, 201, 0.2);
+        }
+
+        .forgot-link { 
+            font-size: 0.8em; 
+            color: #bbb; 
+            text-decoration: none; 
+            display: inline-block;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -27,19 +121,9 @@
         <a href="/" class="logo">🍳 PAPA'S RECIPE</a>
 
         {% if form.errors %}
-            <div class="error-msg">
-                ユーザー名かパスワードが違うみたいやで！
-            </div>
+            <div class="error-msg">ユーザー名かパスワードが違うみたいやで！</div>
         {% endif %}
 
-        {% if messages %}
-            {% for message in messages %}
-                <div style="color: green; font-weight: bold; margin-bottom: 15px;">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-        
         <form method="post">
             {% csrf_token %}
             <input type="text" name="username" placeholder="ユーザー名" required>
@@ -49,7 +133,6 @@
 
         <div class="divider"></div>
 
-        <p style="font-size: 0.85em; color: #666; margin-bottom: 10px;">はじめて使う方はこちら</p>
         <a href="{% url 'signup' %}" class="btn-signup">🆕 新規ユーザー登録</a>
 
         <a href="{% url 'password_reset' %}" class="forgot-link">パスワードを忘れた場合</a>

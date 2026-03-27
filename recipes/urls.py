@@ -13,9 +13,11 @@ urlpatterns = [
 
     # 💰 家計簿関連
     path('budget/', views.budget_list, name='budget_list'),
+    path('budget/create/', views.budget_create, name='budget_create'), # 👈 これを追加！
     path('budget/scan/', views.receipt_scan, name='receipt_scan'),
     path('budget/delete/<int:pk>/', views.budget_delete, name='budget_delete'),
     path('budget/edit/<int:pk>/', views.budget_edit, name='budget_edit'),
+    path('budget/config/', views.budget_config, name='budget_config'),
 
     # 🌟 ログイン・ログアウト
     # (configの方に書いてもいいですが、一旦ここにまとめておきましょう)

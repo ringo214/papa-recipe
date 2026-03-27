@@ -2,81 +2,115 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PAPA'S RECIPE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{% block title %}PAPA'S RECIPE{% endblock %}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
         
-        /* 🎨 全体のベースデザイン（淡いグレー背景でスッキリと） */
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background-color: #F8F9FA; /* 優しいオフホワイト */
+            background-color: #F8F9FA;
             color: #333;
             margin: 0;
-            padding: 0;
-            padding-bottom: 70px; /* 下のメニューに隠れないように余白を取る */
+            /* ボトムナビの高さ分、下を空ける */
+            padding-bottom: 90px;
         }
 
-        /* 📱 スマホ向けのメイン領域 */
+        /* 🌟 iPhone自動ズーム防止 & デザイン統一 */
+        input, textarea, select {
+            font-size: 16px !important;
+            font-family: inherit;
+        }
+
+        /* コンテナに余白を足して、
+        固定ヘッダーに中身が潜り込まんように調整 
+        */
         .container {
-            max-width: 600px; /* PCで見ても広がりすぎないように制限 */
+            max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+            padding-top: 10px; /* ヘッダー直下の余白 */
         }
 
-        /* 📱 スマホ用ボトムナビゲーション（アプリみたいになる！） */
+        /* 🌟 ヘッダーを固定（Sticky Header） */
+        .app-header {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background-color: rgba(248, 249, 250, 0.95); /* 透過させて今っぽく */
+            backdrop-filter: blur(8px); /* 韓国インテリア風のぼかし */
+            z-index: 1100;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        .app-header h1 {
+            margin: 0;
+            font-size: 1.1em;
+            letter-spacing: 2px;
+            color: #333;
+            font-weight: 700;
+        }
+
+        /* 📱 ボトムナビ */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             width: 100%;
-            background-color: #ffffff;
+            max-width: 600px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             border-top: 1px solid #EBEBEB;
             display: flex;
             justify-content: space-around;
-            padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+            padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); /* iPhoneのバー対策 */
             z-index: 1000;
         }
         .bottom-nav a {
             text-decoration: none;
             color: #A0A0A0;
-            font-size: 0.75em;
-            text-align: center;
+            font-size: 0.7em;
             display: flex;
             flex-direction: column;
             align-items: center;
             font-weight: 500;
+            transition: color 0.3s;
         }
-        .bottom-nav a.active {
-            color: #00cec9; /* 選択中の色 */
-        }
-        .nav-icon {
-            font-size: 1.5em;
-            margin-bottom: 3px;
-        }
+        .bottom-nav a.active { color: #00cec9; }
+        .nav-icon { font-size: 1.6em; margin-bottom: 2px; }
     </style>
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
 
+    <header class="app-header">
+        <div style="display: flex; justify-content: center; align-items: center; position: relative; width: 100%; max-width: 600px; margin: 0 auto;">
+            <h1>🍳 PAPA'S RECIPE</h1>
+            
+            <div id="header-search-trigger" style="position: absolute; right: 20px; font-size: 1.2em; cursor: pointer; display: none; transition: opacity 0.3s;">
+                🔍
+            </div>
+        </div>
+    </header>
+
     <div class="container">
-        {% block content %}
-        {% endblock %}
+        {% block content %}{% endblock %}
     </div>
 
-    <div class="bottom-nav">
-        <a href="{% url 'recipe_list' %}">
-            <span class="nav-icon">🍳</span>
-            <span>レシピ</span>
+    <nav class="bottom-nav">
+        <a href="{% url 'recipe_list' %}" class="{% if 'recipe' in request.resolver_match.url_name %}active{% endif %}">
+            <span class="nav-icon">🍳</span><span>レシピ</span>
         </a>
-        <a href="{% url 'budget_list' %}">
-            <span class="nav-icon">💰</span>
-            <span>家計簿</span>
+        <a href="{% url 'budget_list' %}" class="{% if 'budget' in request.resolver_match.url_name %}active{% endif %}">
+            <span class="nav-icon">💰</span><span>家計簿</span>
         </a>
-        <a href="{% url 'inventory_list' %}">
-            <span class="nav-icon">❄️</span>
-            <span>冷蔵庫</span>
+        <a href="{% url 'inventory_list' %}" class="{% if 'inventory' in request.resolver_match.url_name %}active{% endif %}">
+            <span class="nav-icon">❄️</span><span>冷蔵庫</span>
         </a>
-    </div>
+    </nav>
 
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

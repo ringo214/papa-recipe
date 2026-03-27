@@ -178,126 +178,83 @@ def recipe_edit(request, pk):
 # ==========================================
 @login_required
 def budget_list(request):
-    # --- A. 準備（まず現在の日付を確定させる） ---
+    # --- 日付計算ロジック（そのまま保持） ---
     now = timezone.now()
-    year = now.year
-    month = now.month
-    current_month_display = f"{year}年{month}月"
-
-    # 🌟 URLパラメータから年・月を取得。なければ今月。
     year = int(request.GET.get('year', now.year))
     month = int(request.GET.get('month', now.month))
-    
-    # --- 前後の月を計算する魔法 ---
     this_month_date = datetime.date(year, month, 1)
-    # 前の月
     prev_month_date = this_month_date - datetime.timedelta(days=1)
-    # 次の月（今月の1日に32日足せば必ず翌月になる）
     next_month_date = (this_month_date + datetime.timedelta(days=32)).replace(day=1)
 
-    # --- B. 保存処理 (POSTの時だけ動く) ---
-    if request.method == 'POST' and request.POST.get('save_from_scan') == 'true':
-        budget_id = request.POST.get('budget_id')
+    # --- 保存処理（手動入力もここで受ける） ---
+    if request.method == 'POST':
         date = request.POST.get('date')
         item_name = request.POST.get('item_name')
         amount = request.POST.get('amount')
         category = request.POST.get('category')
 
-        # 🌟 1. 強力な重複チェック（日付と金額で判定）
-        if not budget_id:
-            duplicate = Budget.objects.filter(
-                user=request.user, 
-                date=date, 
-                amount=amount
-            ).first()
-            
-            if duplicate:
-                # 🌟 messages.error を warning に変更！
-                messages.warning(request, f"それ、もう登録済みちゃう？（既にある項目：{duplicate.item_name}）")
-                
-                # 🛑 【重要】ここで処理を止めてリダイレクトする！
-                # これがないと、下の「Budget.objects.create」まで進んでしまいます
-                return redirect('budget_list')
-
-        # 2. 家計簿データの保存/更新
-        if budget_id:
-            budget = get_object_or_404(Budget, pk=budget_id, user=request.user)
-            budget.date, budget.item_name = date, item_name
-            budget.amount, budget.category = amount, category
-            budget.save()
-            messages.success(request, "データを修正したで！✨")
+        # 重複チェックロジック（これもRieさんのこだわり）
+        duplicate = Budget.objects.filter(user=request.user, date=date, amount=amount).first()
+        if duplicate:
+            messages.warning(request, f"それ、もう登録済みちゃう？（{duplicate.item_name}）")
         else:
-            # 1. 家計簿に登録（店名と合計金額）
-            Budget.objects.create(
-                user=request.user, date=date, item_name=item_name,
-                amount=amount, category=category
-            )
-
-            # 🌟 2. チェックされた商品を一括で冷蔵庫に入れる
-            selected_items = request.POST.getlist('selected_items')
-            
-            if category == 'food' and selected_items:
-                for product_name in selected_items:
-                    # 🌟 購入日（date）も一緒に保存する
-                    Inventory.objects.create(
-                        user=request.user,
-                        name=product_name,
-                        purchase_date=date, # レシートの日付を入れる！
-                        quantity=1,
-                        unit="個"
-                    )
-                messages.success(request, f"家計簿と、冷蔵庫に食材を入れといたで！❄️")
-            else:
-                messages.success(request, "家計簿に登録したで！💰")
-        
+            Budget.objects.create(user=request.user, date=date, item_name=item_name, amount=amount, category=category)
+            messages.success(request, "家計簿に登録したで！💰")
         return redirect('budget_list')
 
-    # --- C. 表示用データの計算 (POSTでもGETでも、最後は必ずここを通る) ---
-
-    # 1. 今月のリスト取得 (カンマ忘れ修正済み！)
-    # 🌟 指定された年・月でフィルタリング
-    budgets = Budget.objects.filter(
-        user=request.user, 
-        date__year=year, 
-        date__month=month
-    ).order_by('-date')
-
-    # 2. カテゴリ別の「予算 vs 実績」計算
-    actual_data = budgets.values('category').annotate(total=Sum('amount'))
+    # --- 表示データ計算 ---
+    budgets = Budget.objects.filter(user=request.user, date__year=year, date__month=month).order_by('-date')
+    actual_data = budgets.order_by().values('category').annotate(total=Sum('amount'))
     actual_dict = {item['category']: item['total'] for item in actual_data}
     category_budgets = CategoryBudget.objects.filter(user=request.user)
     
     category_status = []
     for cb in category_budgets:
-        spent = actual_dict.get(cb.category, 0)
+        spent = actual_dict.get(cb.category, 0) or 0
         percent = (spent / cb.amount * 100) if cb.amount > 0 else 0
         category_status.append({
             'display_name': cb.get_category_display(),
             'budget': cb.amount, 'spent': spent,
-            'remaining': cb.amount - spent,
-            'percent': min(percent, 100),
+            'remaining': float(cb.amount - spent),
+            'percent': min(float(percent), 100.0),
             'is_over': spent > cb.amount
         })
 
-    # 3. グラフ用データの作成
+    # 📊 グラフ用のJSON変換（ここでfloatにするのがQA的正解）
     category_map = dict(Budget.CATEGORY_CHOICES)
     labels = [category_map.get(item['category'], item['category']) for item in actual_data]
-    graph_data = [item['total'] for item in actual_data]
+    graph_data = [float(item['total'] or 0) for item in actual_data]
 
-    # --- D. まとめて画面に送る ---
     context = {
         'budgets': budgets,
-        'current_month': current_month_display, # 👈 これで () が埋まる！
         'category_status': category_status,
         'labels': json.dumps(labels),
         'data': json.dumps(graph_data),
         'current_month_display': f"{year}年{month}月",
-        'prev_year': prev_month_date.year,
-        'prev_month': prev_month_date.month,
-        'next_year': next_month_date.year,
-        'next_month': next_month_date.month,
+        'prev_year': prev_month_date.year, 'prev_month': prev_month_date.month,
+        'next_year': next_month_date.year, 'next_month': next_month_date.month,
+        'category_choices': Budget.CATEGORY_CHOICES, # フォーム用
     }
     return render(request, 'recipes/budget_list.html', context)
+
+# --- A. 新規作成用のViewを追加 ---
+@login_required
+def budget_create(request):
+    if request.method == 'POST':
+        form = BudgetForm(request.POST)
+        if form.is_valid():
+            budget = form.save(commit=False)
+            budget.user = request.user
+            budget.save()
+            messages.success(request, "家計簿に手動で追加したで！💰")
+            return redirect('budget_list')
+    else:
+        form = BudgetForm()
+    
+    return render(request, 'recipes/budget_form.html', {
+        'form': form,
+        'title': "家計簿の手動入力"
+    })
 
 # 🌟 削除機能
 def budget_delete(request, pk):

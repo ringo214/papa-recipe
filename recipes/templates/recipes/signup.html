@@ -2,35 +2,174 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>新規登録 - PAPA'S RECIPE</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&display=swap');
-        body { background-color: #FAFAFA; font-family: 'Noto Sans JP', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; max-width: 350px; text-align: center; }
-        .logo { font-size: 1.5em; letter-spacing: 2px; margin-bottom: 20px; display: block; color: #333; text-decoration: none; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; }
-        input:focus { border-color: #00cec9; }
-        .btn-signup { background-color: #00cec9; color: white; border: none; width: 100%; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: opacity 0.3s; margin-top: 10px; }
-        .btn-signup:hover { opacity: 0.9; }
-        .back-link { font-size: 0.85em; color: #999; text-decoration: none; display: inline-block; margin-top: 20px; }
-        .back-link:hover { text-decoration: underline; }
-        /* エラーメッセージ用のデザイン */
-        .helptext { font-size: 0.75em; color: #666; text-align: left; display: block; margin-bottom: 10px;}
-        ul.errorlist { color: #ff7675; font-size: 0.8em; text-align: left; padding-left: 20px; margin-top: -10px; margin-bottom: 10px;}
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+
+        body { 
+            background-color: #f7f9fc; 
+            font-family: 'Noto Sans JP', sans-serif; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .signup-card { 
+            background: white; 
+            padding: 40px 30px; 
+            border-radius: 25px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.07); 
+            width: 100%; 
+            max-width: 400px; 
+            text-align: center; 
+        }
+
+        .logo { 
+            font-size: 1.6em; 
+            font-weight: 700;
+            letter-spacing: 2px; 
+            margin-bottom: 10px; 
+            display: block; 
+            color: #333; 
+            text-decoration: none; 
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+
+        /* フォーム要素の共通スタイル */
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
+            margin-left: 5px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] { 
+            width: 100%; 
+            padding: 14px; 
+            border: 2px solid #eee; 
+            border-radius: 12px; 
+            box-sizing: border-box; 
+            outline: none; 
+            font-size: 1em;
+            transition: all 0.3s;
+            background-color: #fcfcfc;
+        }
+
+        input:focus { 
+            border-color: #00cec9; 
+            background-color: white;
+            box-shadow: 0 0 8px rgba(0, 206, 201, 0.1);
+        }
+
+        .btn-signup { 
+            background-color: #00cec9; 
+            color: white; 
+            border: none; 
+            width: 100%; 
+            padding: 16px; 
+            border-radius: 50px; 
+            font-weight: bold; 
+            font-size: 1em;
+            cursor: pointer; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            margin-top: 10px; 
+            box-shadow: 0 5px 15px rgba(0, 206, 201, 0.3);
+        }
+
+        .btn-signup:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 206, 201, 0.4);
+        }
+
+        .btn-signup:active {
+            transform: translateY(0);
+        }
+
+        .back-link { 
+            font-size: 0.85em; 
+            color: #aaa; 
+            text-decoration: none; 
+            display: inline-block; 
+            margin-top: 25px; 
+            transition: color 0.2s;
+        }
+
+        .back-link:hover { color: #6c5ce7; text-decoration: underline; }
+
+        /* Djangoエラー・ヘルプテキストの調整 */
+        .helptext { 
+            font-size: 0.75em; 
+            color: #999; 
+            display: block; 
+            margin-top: 5px;
+            padding: 0 5px;
+            line-height: 1.4;
+        }
+        
+        ul.errorlist { 
+            color: #ff7675; 
+            font-size: 0.8em; 
+            text-align: left; 
+            padding: 0; 
+            margin: 5px 0 15px 5px;
+            list-style: none;
+            font-weight: bold;
+        }
+
+        /* 既存のフォームクラスを上書き */
+        p { margin: 0; }
     </style>
 </head>
 <body>
-    <div class="login-card">
+
+    <div class="signup-card">
         <a href="/" class="logo">🍳 PAPA'S RECIPE</a>
-        <h3 style="color: #555; margin-bottom: 20px; font-size: 1.1em;">新規ユーザー登録</h3>
+        <div class="subtitle">まずはアカウントを作ろう！</div>
 
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+            
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <span class="helptext">{{ field.help_text|safe }}</span>
+                    {% endif %}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
             <button type="submit" class="btn-signup">登録する</button>
         </form>
 
-        <a href="{% url 'login' %}" class="back-link">← ログイン画面に戻る</a>
+        <a href="{% url 'login' %}" class="back-link">← すでにアカウントがある方はログイン</a>
     </div>
+
 </body>
 </html>

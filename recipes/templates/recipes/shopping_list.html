@@ -1,31 +1,111 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>買い物リスト - PAPA'S RECIPE</title>
-</head>
-<body style="font-family: sans-serif; background-color: #f7f9fc; color: #333; margin: 0; padding: 20px;">
-    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        
-        <a href="{% url 'recipe_list' %}" style="text-decoration: none; color: #6c5ce7; font-weight: bold;">← 一覧に戻る</a>
-        
-        <h1 style="color: #00b894; border-bottom: 2px solid #00b894; padding-bottom: 10px; text-align: center;">🛒 買い物リスト</h1>
+{% extends 'recipes/base.html' %}
 
-        {% if selected_recipes %}
-            {% for recipe in selected_recipes %}
-                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 10px; background-color: #fafafa;">
-                    <h2 style="margin-top: 0; color: #6c5ce7; font-size: 20px;">{{ recipe.title }}</h2>
-                    <p style="white-space: pre-wrap; font-size: 16px; margin-bottom: 0;">{{ recipe.ingredients }}</p>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p style="text-align: center; color: #888; margin: 40px 0;">レシピが選ばれていません！</p>
-        {% endif %}
+{% block content %}
+<style>
+    /* 🌟 買い物リスト専用のスタイル */
+    .shopping-container {
+        max-width: 600px; margin: 0 auto; padding-bottom: 50px;
+    }
+    .back-link {
+        display: inline-block; text-decoration: none; color: #6c5ce7;
+        font-weight: bold; margin-bottom: 20px; font-size: 0.9em;
+    }
+    .page-title {
+        color: #00b894; border-bottom: 3px solid #00b894;
+        padding-bottom: 10px; text-align: center; font-size: 1.5em; margin-bottom: 30px;
+    }
+    .shopping-card {
+        background: white; border-radius: 20px; padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;
+    }
+    .recipe-name {
+        margin-top: 0; color: #6c5ce7; font-size: 1.1em;
+        border-left: 4px solid #6c5ce7; padding-left: 10px; margin-bottom: 15px;
+    }
+    
+    /* 材料のリスト表示 */
+    .ingredient-list { list-style: none; padding: 0; margin: 0; }
+    .ingredient-item {
+        display: flex; align-items: center; padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0; cursor: pointer;
+        transition: opacity 0.3s;
+    }
+    .ingredient-item:last-child { border-bottom: none; }
+    
+    /* チェックボックスのカスタム */
+    .custom-checkbox {
+        width: 22px; height: 22px; border: 2px solid #ddd;
+        border-radius: 6px; margin-right: 12px; position: relative;
+        flex-shrink: 0;
+    }
+    .ingredient-item.checked .custom-checkbox {
+        background-color: #00b894; border-color: #00b894;
+    }
+    .ingredient-item.checked .custom-checkbox::after {
+        content: '✓'; color: white; position: absolute;
+        top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold;
+    }
+    .ingredient-text { font-size: 1em; color: #333; line-height: 1.4; }
+    .ingredient-item.checked .ingredient-text {
+        text-decoration: line-through; color: #bbb;
+    }
 
-        <div style="text-align: center; margin-top: 30px;">
-            <a href="{% url 'recipe_list' %}" style="background-color: #ccc; color: white; text-decoration: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; display: inline-block;">買い出し完了！</a>
+    .btn-finish {
+        display: block; width: 100%; text-align: center; padding: 18px;
+        border-radius: 50px; font-weight: bold; text-decoration: none;
+        color: white; background-color: #6c5ce7; margin-top: 30px;
+        box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+    }
+</style>
+
+<div class="shopping-container">
+    <a href="{% url 'recipe_list' %}" class="back-link">← レシピ一覧に戻る</a>
+    
+    <h1 class="page-title">🛒 買い物リスト</h1>
+
+    {% if selected_recipes %}
+        {% for recipe in selected_recipes %}
+        <div class="shopping-card">
+            <h2 class="recipe-name">{{ recipe.title }}</h2>
+            <div class="ingredient-list">
+                {% comment %} 
+                    材料を改行で区切ってリスト化して表示します。
+                    View側でリスト化していない場合を考慮し、JSやテンプレートフィルタで対応可能な形式にしています。
+                {% endcomment %}
+                {% with ingredients=recipe.ingredients.splitlines %}
+                    {% for item in ingredients %}
+                        {% if item.strip %}
+                        <div class="ingredient-item" onclick="toggleItem(this)">
+                            <div class="custom-checkbox"></div>
+                            <span class="ingredient-text">{{ item }}</span>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endwith %}
+            </div>
         </div>
-    </div>
-</body>
-</html>
+        {% endfor %}
+
+        <a href="{% url 'recipe_list' %}" class="btn-finish">買い出し完了！</a>
+    {% else %}
+        <div style="text-align: center; padding: 50px 20px; background: white; border-radius: 20px;">
+            <div style="font-size: 3em; margin-bottom: 10px;">🤔</div>
+            <p style="color: #888;">レシピが選ばれてへんみたいやわ。<br>一覧からチェックを入れてみてな！</p>
+            <a href="{% url 'recipe_list' %}" class="btn-finish" style="background-color: #ccc;">一覧に戻る</a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    // 材料をタップした時にチェックを入れるアニメーション
+    function toggleItem(element) {
+        element.classList.toggle('checked');
+        
+        // バイブレーション（スマホ対応）
+        if (window.navigator.vibrate) {
+            window.navigator.vibrate(10);
+        }
+    }
+</script>
+
+{% endblock %}

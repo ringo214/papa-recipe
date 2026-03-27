@@ -24,9 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-kiw_xv#*k%o@2idw(x33qs$-o@@@_yyd7+^d(nug583_^fd#$p'
 
 # 本番環境では False、自分のPCでは True にしたいので、こう書くのが賢いです
-DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
+# DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
+DEBUG = True
 
-ALLOWED_HOSTS = ['rie.pythonanywhere.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['ringo214.pythonanywhere.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -126,8 +127,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # 未ログイン時に飛ばす先のURL
 LOGIN_URL = 'login' 
 
-# ログインした後に飛ばす先のURL（家計簿一覧など）
-LOGIN_REDIRECT_URL = 'budget_list'
+# 修正：ログイン後に飛ばす先を 'recipe_list' に変更
+LOGIN_REDIRECT_URL = 'recipe_list'
 
 # ログアウトした後に飛ばす先のURL
 LOGOUT_REDIRECT_URL = 'login'
