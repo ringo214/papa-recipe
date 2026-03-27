@@ -24,15 +24,28 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='recipes/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('signup/', views.SignUpView.as_view(), name='signup'),
-    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='recipes/password_reset.html'), name='password_reset'),
-    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='recipes/password_reset_done.html'), name='password_reset_done'),
-    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='recipes/password_reset_confirm.html'), name='password_reset_confirm'),
-    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='recipes/password_reset_complete.html'), name='password_reset_complete'),
     path('budget/config/', views.budget_config, name='budget_config'),
+
+    # 🌟 「templates/」を削除して、その中身のパスだけを書く！
+    path('password_reset/', auth_views.PasswordResetView.as_view(
+        template_name='registration/password_reset_form.html'
+    ), name='password_reset'),
+
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(
+        template_name='registration/password_reset_done.html'
+    ), name='password_reset_done'),
+
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='registration/password_reset_confirm.html'
+    ), name='password_reset_confirm'),
+
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='registration/password_reset_complete.html'
+    ), name='password_reset_complete'),
 
     # 🌟 冷蔵庫（在庫一覧＆登録）
     path('inventory/', views.inventory_list, name='inventory_list'),
-    
+
     # 🌟 在庫削除（使い切った！ボタン用）
     path('inventory/delete/<int:pk>/', views.inventory_delete, name='inventory_delete'),
 ]

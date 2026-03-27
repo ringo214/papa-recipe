@@ -33,13 +33,13 @@ ALLOWED_HOSTS = ['ringo214.pythonanywhere.com', 'localhost', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'recipes',
+    'django.contrib.admin',
 ]
 
 MIDDLEWARE = [
@@ -125,7 +125,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # 未ログイン時に飛ばす先のURL
-LOGIN_URL = 'login' 
+LOGIN_URL = 'login'
 
 # 修正：ログイン後に飛ばす先を 'recipe_list' に変更
 LOGIN_REDIRECT_URL = 'recipe_list'
@@ -135,6 +135,9 @@ LOGOUT_REDIRECT_URL = 'login'
 
 # 開発中：送信されるメールの内容をターミナルに表示する魔法
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+EMAIL_HOST_USER = '17993cc4e58be4803b2a49f5315755ad'
+EMAIL_HOST_PASSWORD = '8c9bb867f0b693e9d243491e5b52d89a'
 
 # config/settings.py の一番下とかに追記
 from django.contrib.messages import constants as messages
