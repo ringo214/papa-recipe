@@ -45,6 +45,7 @@ urlpatterns = [
 
     # 🌟 冷蔵庫（在庫一覧＆登録）
     path('inventory/', views.inventory_list, name='inventory_list'),
+    path('receipt/save/', views.receipt_save, name='receipt_save'),
 
     # 🌟 在庫削除（使い切った！ボタン用）
     path('inventory/delete/<int:pk>/', views.inventory_delete, name='inventory_delete'),

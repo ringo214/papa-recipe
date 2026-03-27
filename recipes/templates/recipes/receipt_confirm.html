@@ -10,7 +10,7 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         margin-bottom: 20px;
     }
-    
+
     .confirm-title {
         text-align: center;
         font-size: 1.2em;
@@ -22,7 +22,7 @@
     .form-group {
         margin-bottom: 20px;
     }
-    
+
     .form-group label {
         display: block;
         font-size: 0.8em;
@@ -110,10 +110,10 @@
 
 <div class="confirm-card">
     <div class="confirm-title">🛒 内容の確認</div>
-    
+
     <form action="{% url 'budget_list' %}" method="POST">
         {% csrf_token %}
-        <input type="hidden" name="save_from_scan" value="true">
+        <input type="hidden" name="item_list_raw" value="{{ item_list_raw_json }}">
 
         <div class="form-group">
             <label>日付</label>
@@ -145,7 +145,7 @@
         <div class="fridge-section">
             <div class="fridge-title">❄️ 冷蔵庫に入れるもの</div>
             <p style="font-size: 0.75em; color: #74b9ff; margin-bottom: 15px;">チェックを入れたものが在庫に追加されるで！</p>
-            
+
             {% for item in scan_data.item_list_raw %}
             <div class="item-row">
                 <input type="checkbox" name="selected_items" value="{{ item }}" class="item-checkbox" checked>

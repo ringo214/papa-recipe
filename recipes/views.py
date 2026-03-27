@@ -104,13 +104,13 @@ def recipe_list(request):
         for item in fridge_items:
             # 冷蔵庫の食材名が辞書にあればそのリストを、なければ元の名前だけを使う
             search_terms = SYNONYMS.get(item, [item])
-            
+
             # 辞書の中身を1つずつ、レシピの材料（ingredients）に含まれているかチェック！
             for term in search_terms:
                 if recipe.ingredients and term in recipe.ingredients:
                     match_count += 1
                     break  # 1つでもヒットしたら、重複カウントを防ぐために次の食材へ
-        
+
         # 🌟 「2つ以上」一致したらバッジを出すようにしておく！
         recipe.can_make = match_count >= 2
 
@@ -127,7 +127,7 @@ def recipe_detail(request, pk):
             return redirect('recipe_detail', pk=recipe.pk)
     else:
         form = CookLogForm()
-    
+
     cook_logs = recipe.cook_logs.all().order_by('-created_at')
     comment_form = CommentForm()
     context = {'recipe': recipe, 'form': form, 'cook_logs': cook_logs, 'comment_form': comment_form}
@@ -155,7 +155,7 @@ def recipe_new(request):
         if form.is_valid():
             recipe = form.save(commit=False)
             # 🌟 ここが魔法のコード！ログイン中の「自分」を追加者にセット
-            recipe.author_user = request.user 
+            recipe.author_user = request.user
             recipe.save()
             return redirect('recipe_detail', pk=recipe.pk)
     else:
@@ -192,14 +192,30 @@ def budget_list(request):
         item_name = request.POST.get('item_name')
         amount = request.POST.get('amount')
         category = request.POST.get('category')
+        
+        # 🌟 HTMLのチェックボックスから選択された食材を取得
+        selected_items = request.POST.getlist('selected_items')
 
         # 重複チェックロジック（これもRieさんのこだわり）
         duplicate = Budget.objects.filter(user=request.user, date=date, amount=amount).first()
         if duplicate:
             messages.warning(request, f"それ、もう登録済みちゃう？（{duplicate.item_name}）")
         else:
+            # 1. 家計簿に保存
             Budget.objects.create(user=request.user, date=date, item_name=item_name, amount=amount, category=category)
-            messages.success(request, "家計簿に登録したで！💰")
+            
+            # 2. 冷蔵庫(Inventory)に保存 (Modelの purchase_date に合わせる)
+            if selected_items:
+                for product_name in selected_items:
+                    Inventory.objects.create(
+                        user=request.user,
+                        name=product_name,
+                        purchase_date=date
+                    )
+                messages.success(request, f"家計簿と冷蔵庫に保存したで！✨")
+            else:
+                messages.success(request, "家計簿に登録したで！💰")
+                
         return redirect('budget_list')
 
     # --- 表示データ計算 ---
@@ -207,7 +223,7 @@ def budget_list(request):
     actual_data = budgets.order_by().values('category').annotate(total=Sum('amount'))
     actual_dict = {item['category']: item['total'] for item in actual_data}
     category_budgets = CategoryBudget.objects.filter(user=request.user)
-    
+
     category_status = []
     for cb in category_budgets:
         spent = actual_dict.get(cb.category, 0) or 0
@@ -250,7 +266,7 @@ def budget_create(request):
             return redirect('budget_list')
     else:
         form = BudgetForm()
-    
+
     return render(request, 'recipes/budget_form.html', {
         'form': form,
         'title': "家計簿の手動入力"
@@ -274,9 +290,9 @@ def budget_edit(request, pk):
         budget.save()
         messages.success(request, "修正完了や！")
         return redirect('budget_list')
-    
+
     return render(request, 'recipes/receipt_confirm.html', {
-        'data': budget, 
+        'scan_data': budget,
         'category_choices': Budget.CATEGORY_CHOICES,
         'is_edit': True # 編集モード判定用
     })
@@ -304,7 +320,7 @@ def receipt_scan(request):
 
             # 🌟 修正：リストで確認できた「models/gemini-2.5-flash」をフルネームで指定！
             response = client.models.generate_content(
-                model='models/gemini-2.5-flash', 
+                model='models/gemini-2.5-flash',
                 contents=[
                     prompt,
                     types.Part.from_bytes(data=img_data, mime_type=img_file.content_type)
@@ -331,6 +347,17 @@ def receipt_scan(request):
 
     return redirect('budget_list')
 
+# recipes/views.py
+
+@login_required
+def receipt_save(request):
+    """
+    現在は budget_list で一括保存しているため、
+    URLの整合性のためにリダイレクトのみ残す
+    """
+    return redirect('budget_list')
+
+
 class SignUpView(SuccessMessageMixin, generic.CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy('login') # 登録成功したらログイン画面へ
@@ -342,7 +369,7 @@ class SignUpView(SuccessMessageMixin, generic.CreateView):
 def budget_config(request):
     # カテゴリの選択肢を取得
     categories = Budget.CATEGORY_CHOICES
-    
+
     if request.method == 'POST':
         for category_code, category_name in categories:
             amount = request.POST.get(f'budget_{category_code}', 0)
@@ -358,7 +385,7 @@ def budget_config(request):
 
     # 現在の設定値を取得して辞書にする { 'food': 30000, ... }
     current_budgets = {
-        cb.category: cb.amount 
+        cb.category: cb.amount
         for cb in CategoryBudget.objects.filter(user=request.user)
     }
 
@@ -373,7 +400,7 @@ def budget_config(request):
 @login_required
 def inventory_list(request):
     items = Inventory.objects.filter(user=request.user).order_by('expiration_date')
-    
+
     if request.method == 'POST':
         form = InventoryForm(request.POST)
         if form.is_valid():
@@ -383,7 +410,7 @@ def inventory_list(request):
             return redirect('inventory_list')
     else:
         form = InventoryForm()
-        
+
     return render(request, 'recipes/inventory_list.html', {'items': items, 'form': form})
 
 # recipes/views.py
